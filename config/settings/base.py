@@ -10,7 +10,7 @@ BASE_DIR = root()
 
 ALLOWED_HOSTS = ['*']
 
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = '-cu6ykde21-!@=582-#1mgj$5xhph@hxybo1qqtsut8uas^w@b'
 
 # Application definition
 
