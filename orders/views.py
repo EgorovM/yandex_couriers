@@ -103,7 +103,6 @@ def assign(request):
 @csrf_exempt
 def complete(request):
     if request.method == "POST":
-        print(request.POST)
         if not request.POST:
             data = json.loads(request.body)
         else:
