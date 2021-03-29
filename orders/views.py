@@ -52,6 +52,9 @@ def orders(request):
 
 
 def assign(request):
+    if request.method == "GET":
+        return JsonResponse({}, status=400)
+        
     courier_id = request.POST['courier_id']
 
     courier = Courier.objects.filter(id=courier_id).first()
