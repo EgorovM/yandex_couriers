@@ -1,5 +1,6 @@
 import json
 
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User, Group
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -19,6 +20,7 @@ def generate_objects_by_id(key, ids_list, problems=None):
     }
     
 
+@csrf_exempt
 def couriers(request):
     if request.method == 'POST':
         problems = {}
@@ -62,6 +64,7 @@ def couriers(request):
     })
 
 
+@csrf_exempt
 def courier_view(request, courier_id):
     data = {}
     courier = Courier.objects.filter(id=courier_id).first()

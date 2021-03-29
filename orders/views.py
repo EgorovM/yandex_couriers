@@ -1,5 +1,6 @@
 import datetime
 
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.dateparse import parse_datetime
 from django.http import JsonResponse
 from django.utils import timezone
@@ -19,6 +20,7 @@ def generate_objects_by_id(key, ids_list, problems=None):
     }
 
 
+@csrf_exempt
 def orders(request):
     if request.method == "POST":
         problems = {} 
@@ -51,6 +53,7 @@ def orders(request):
     return JsonResponse({})
 
 
+@csrf_exempt
 def assign(request):
     if request.method == "GET":
         return JsonResponse({}, status=400)
@@ -87,6 +90,7 @@ def assign(request):
     }, status=200)
     
 
+@csrf_exempt
 def complete(request):
     if request.method == "POST":
         courier_id = request.POST['courier_id']
