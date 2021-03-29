@@ -67,7 +67,7 @@ def courier_view(request, courier_id):
     courier = Courier.objects.filter(id=courier_id).first()
 
     if not courier:
-        return JsonResponse({"error": 0}, code=400)
+        return JsonResponse({"error": 0}, status=400)
 
     if request.method == "PATCH":
         body_unicode = request.body.decode('utf-8')
