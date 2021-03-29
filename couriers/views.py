@@ -27,9 +27,12 @@ def couriers(request):
         invalid_ids = []
         couriers = []
 
-        for data in request.POST.getlist('data'):
-            courier_json = eval(data)
+        if not request.POST:
+            data_list = json.loads(request.body)['data']
+        else:
+            data_list = [eval(d) for d in request.POST.getlist('data')]
 
+        for courier_json in data_list:
             courier = Courier.from_json(courier_json)
 
             if not isinstance(courier, Courier):

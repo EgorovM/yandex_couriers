@@ -204,7 +204,7 @@ class OrderTest(TestCase):
         })
 
         response = c.get('/couriers/1/')
-
+    
         self.assertEqual(response.status_code, 200)
         self.assertEqual(eval(response.content), {
             "courier_id": 1, 

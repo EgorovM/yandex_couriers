@@ -1,3 +1,4 @@
+import json
 import datetime
 
 from django.views.decorators.csrf import csrf_exempt
@@ -27,13 +28,17 @@ def orders(request):
         invalid_ids = []
         orders = []
 
-        for data in request.POST.getlist('data'):
-            data = eval(data)
-            order = Order.from_json(data)
+        if not request.POST:
+            data_list = json.loads(request.body)['data']
+        else:
+            data_list = [eval(d) for d in request.POST.getlist('data')]
+        
+        for order_data in data_list:
+            order = Order.from_json(order_data)
 
             if not isinstance(order, Order):
-                invalid_ids.append(data['order_id'])
-                problems[data['order_id']] = order
+                invalid_ids.append(order_data['order_id'])
+                problems[order_data['order_id']] = order
 
             orders.append(order)
 
@@ -57,13 +62,18 @@ def orders(request):
 def assign(request):
     if request.method == "GET":
         return JsonResponse({}, status=400)
-        
-    courier_id = request.POST['courier_id']
+    
+    if not request.POST:
+        data = json.loads(request.body)
+    else:
+        data = request.POST
+
+    courier_id = data['courier_id']
 
     courier = Courier.objects.filter(id=courier_id).first()
 
     if not courier:
-        return JsonResponse({}, status=400)
+        return JsonResponse({'courier_id': {'code': 3, 'description': 'Некорректный id'}}, status=400)
 
     order_list = []
 
@@ -93,9 +103,15 @@ def assign(request):
 @csrf_exempt
 def complete(request):
     if request.method == "POST":
-        courier_id = request.POST['courier_id']
-        order_id = request.POST['order_id']
-        complete_time = parse_datetime(request.POST['complete_time'])
+        print(request.POST)
+        if not request.POST:
+            data = json.loads(request.body)
+        else:
+            data = request.POST
+        
+        courier_id = data['courier_id']
+        order_id = data['order_id']
+        complete_time = parse_datetime(data['complete_time'])
 
         order = Order.objects.filter(id=order_id).first()
 
