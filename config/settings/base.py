@@ -8,6 +8,8 @@ def root(*dirs):
 
 BASE_DIR = root()
 
+ALLOWED_HOSTS = ['*']
+
 SECRET_KEY = config('SECRET_KEY')
 
 # Application definition
