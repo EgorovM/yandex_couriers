@@ -1,20 +1,27 @@
 import datetime
 
+from django.utils.dateparse import parse_datetime
 from django.http import JsonResponse
 from django.utils import timezone
 
 from couriers.models import Courier, Order, Region
 
 
-def generate_objects_by_id(key, ids_list):
+def generate_objects_by_id(key, ids_list, problems=None):
+    values = [{'id': i} for i in ids_list]
+
+    if problems:
+        for d in values:
+            d['errors'] = problems[d['id']]
+
     return {
-        key: [{'id': i} for i in ids_list]
+        key: values
     }
 
 
 def orders(request):
     if request.method == "POST":
-        error = False
+        problems = {} 
         invalid_ids = []
         orders = []
 
@@ -22,15 +29,15 @@ def orders(request):
             data = eval(data)
             order = Order.from_json(data)
 
-            if not order:
-                error = True
+            if not isinstance(order, Order):
                 invalid_ids.append(data['order_id'])
+                problems[data['order_id']] = order
 
             orders.append(order)
 
-        if error:
+        if invalid_ids:
             return JsonResponse({
-                    'validation_error': generate_objects_by_id('orders', invalid_ids)
+                    'validation_error': generate_objects_by_id('orders', invalid_ids, problems)
                 },
                 status=400)
 
@@ -81,7 +88,7 @@ def complete(request):
     if request.method == "POST":
         courier_id = request.POST['courier_id']
         order_id = request.POST['order_id']
-        complete_time = request.POST['complete_time']
+        complete_time = parse_datetime(request.POST['complete_time'])
 
         order = Order.objects.filter(id=order_id).first()
 

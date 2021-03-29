@@ -8,6 +8,6 @@ app_name = 'couriers'
 
 urlpatterns = [
     path('', views.couriers),
-    path('<int:courier_id>', views.courier_view)
+    path('<int:courier_id>/', views.courier_view)
 ]
 

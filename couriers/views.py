@@ -7,15 +7,21 @@ from django.http import JsonResponse
 from couriers.models import Courier
 
 
-def generate_objects_by_id(key, ids_list):
+def generate_objects_by_id(key, ids_list, problems=None):
+    values = [{'id': i} for i in ids_list]
+
+    if problems:
+        for d in values:
+            d['errors'] = problems[d['id']]
+
     return {
-        key: [{'id': i} for i in ids_list]
+        key: values
     }
     
 
 def couriers(request):
     if request.method == 'POST':
-        error = False
+        problems = {}
         invalid_ids = []
         couriers = []
 
@@ -24,17 +30,17 @@ def couriers(request):
 
             courier = Courier.from_json(courier_json)
 
-            if courier is None:
-                error = True
+            if not isinstance(courier, Courier):
                 invalid_ids.append(courier_json['courier_id'])
+                problems[courier_json['courier_id']] = courier
 
             couriers.append(courier)
 
-        if error:
+        if invalid_ids:
             return JsonResponse(
                 {
                     'validation_error': 
-                            generate_objects_by_id('couriers', invalid_ids)
+                            generate_objects_by_id('couriers', invalid_ids, problems)
                 },
                 status=400
             )
@@ -67,9 +73,15 @@ def courier_view(request, courier_id):
         body_unicode = request.body.decode('utf-8')
         body = eval(body_unicode)
 
-        courier.patch(body)
+        courier = courier.patch(body)
 
-        return JsonResponse(courier.to_json())
+        if isinstance(courier, Courier):
+            return JsonResponse(courier.to_json(), status=200)
+
+        return JsonResponse(
+            courier,
+            status=400
+        )
 
     if courier:
         data = courier.to_json(
